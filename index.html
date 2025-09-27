@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>文字種変換</title>
+  <style>
+    body{display:flex;gap:16px;padding:24px;flex-wrap:wrap}
+    .col{flex:1;flex-basis:300px;display:flex;flex-direction:column;gap:8px}
+    textarea{width:100%;height:300px;padding:12px;font-size:16px;resize:vertical;box-sizing: border-box}
+    pre{white-space:pre-wrap;word-break:break-word;background:#f4f4f4;padding:12px;border-radius:6px;max-width: 100%;box-sizing:border-box}
+    .row{display:flex;gap:8px}
+    button{padding:8px 12px;border-radius:6px;border:1px solid #ccc;background:#fff}
+  </style>
+</head>
+<body>
+  <div class="col">
+    <label>入力</label>
+    <textarea id="input" placeholder="ここに文字を入力"></textarea>
+    <div class="row">
+      <button id="clearInput">入力クリア</button>
+      <button id="copyOutput">出力コピー</button>
+    </div>
+  </div>
+  <div class="col">
+    <label>変換結果</label>
+    <pre id="output" aria-live="polite"></pre>
+  </div>
+
+  <script>
+    const input = document.getElementById('input');
+    const output = document.getElementById('output');
+    const clearBtn = document.getElementById('clearInput');
+    const copyBtn = document.getElementById('copyOutput');
+
+    let isComposing = false;
+
+    const smallHiragana = new Set(['ぁ','ぃ','ぅ','ぇ','ぉ','ゃ','ゅ','ょ','ゎ','ゕ','ゖ','っ']);
+    const smallKatakana = new Set(['ァ','ィ','ゥ','ェ','ォ','ャ','ュ','ョ','ヮ','ヵ','ヶ','ッ']);
+
+    function mapChar(ch){
+      // 伸ばし棒はそのまま
+      if (ch === 'ー') return ch;
+      
+      const code = ch.codePointAt(0);
+      if ((code >= 0x3040 && code <= 0x309F)){
+        if (smallHiragana.has(ch)) return 'ぁ';
+        return 'あ';
+      }
+      if ((code >= 0x30A0 && code <= 0x30FF)){
+        if (smallKatakana.has(ch)) return 'ァ';
+        return 'ア';
+      }
+      if ((code >= 0x4E00 && code <= 0x9FFF) || (code >= 0x3400 && code <= 0x4DBF)){
+        return '漢';
+      }
+      if (ch >= '0' && ch <= '9') return '1';
+      if (ch >= 'A' && ch <= 'Z') return 'A';
+      if (ch >= 'a' && ch <= 'z') return 'a';
+      return ch;
+    }
+
+    function transformText(text){
+      let out = '';
+      for (const ch of text) out += mapChar(ch);
+      return out;
+    }
+
+    input.addEventListener('compositionstart', ()=> isComposing = true);
+    input.addEventListener('compositionend', ()=>{ isComposing = false; handleInput(); });
+
+    function handleInput(){
+      if (isComposing) return;
+      const start = input.selectionStart;
+      const end = input.selectionEnd;
+      const original = input.value;
+      const transformed = transformText(original);
+      output.textContent = transformed;
+      // keep cursor positions logically same
+      try{
+        input.setSelectionRange(start, end);
+      }catch(e){/* ignore */}
+    }
+
+    input.addEventListener('input', handleInput);
+
+    clearBtn.addEventListener('click', ()=>{ input.value=''; output.textContent=''; input.focus(); });
+
+    copyBtn.addEventListener('click', async ()=>{
+      try{ await navigator.clipboard.writeText(output.textContent); alert('コピーしました'); }
+      catch{ alert('コピーに失敗しました'); }
+    });
+
+    // initial
+    handleInput();
+  </script>
+</body>
+</html>
