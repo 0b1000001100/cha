@@ -1,7 +1,7 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8">
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>文字種変換</title>
   <style>
@@ -41,6 +41,68 @@
     function mapChar(ch){
       // 伸ばし棒はそのまま
       if (ch === 'ー') return ch;
+
+			// アルファベット＋ダイアクリティカル対応
+  		// NFDで分解（例: é → e + ́）
+			const nfd = ch.normalize("NFD");
+			const base = nfd[0];
+			const marks = nfd.slice(1);
+
+			// ストローク付きなど独立文字のマッピングは先に判定
+			const strokeMap = {
+				"Ⱥ": "Ⱥ", 
+				"ⱥ": "ⱥ", 
+				"Ƀ": "Ⱥ", 
+				"ƀ": "ⱥ", 
+				"Ȼ": "Ⱥ", 
+				"ȼ": "ⱥ", 
+				"Đ": "Ⱥ", 
+				"đ": "ⱥ", 
+				"Ð": "Ⱥ", 
+				"ð": "ⱥ", 
+				"Ɖ": "Ⱥ", 
+				"ɖ": "ⱥ", 
+				"Ɇ": "Ⱥ", 
+				"ɇ": "ⱥ", 
+				"Ǥ": "Ⱥ", 
+				"ǥ": "ⱥ", 
+				"Ħ": "Ⱥ", 
+				"ħ": "ⱥ", 
+				"Ɨ": "Ⱥ", 
+				"ɨ": "ⱥ", 
+				"Ɉ": "Ⱥ", 
+				"ɉ": "ⱥ", 
+				"Ł": "Ⱥ", 
+				"ł": "ⱥ", 
+				"Ƚ": "Ⱥ", 
+				"ƚ": "ⱥ", 
+				"Ø": "Ⱥ", 
+				"ø": "ⱥ", 
+				"Ɵ": "Ⱥ", 
+				"ɵ": "ⱥ", 
+				"Ᵽ": "Ⱥ", 
+				"ᵽ": "ⱥ", 
+				"Ɍ": "Ⱥ", 
+				"ɍ": "ⱥ", 
+				"Ŧ": "Ⱥ", 
+				"ŧ": "ⱥ", 
+				"Ⱦ": "Ⱥ", 
+				"ⱦ": "ⱥ", 
+				"Ʉ": "Ⱥ", 
+				"ʉ": "ⱥ", 
+				"Ɏ": "Ⱥ", 
+				"ɏ": "ⱥ", 
+				"Ƶ": "Ⱥ", 
+				"ƶ": "ⱥ"
+			};
+			if (strokeMap[ch]) return strokeMap[ch];
+
+			if (/[A-Z]/.test(base)) {
+				return "A" + marks;
+			}
+			if (/[a-z]/.test(base)) {
+				return "a" + marks;
+			}
       
       const code = ch.codePointAt(0);
       if ((code >= 0x3040 && code <= 0x309F)){
@@ -57,6 +119,13 @@
       if (ch >= '0' && ch <= '9') return '1';
       if (ch >= 'A' && ch <= 'Z') return 'A';
       if (ch >= 'a' && ch <= 'z') return 'a';
+      if (
+      	(code >= 0x1100 && code <= 0x11FF) || // Jamo
+  			(code >= 0x3130 && code <= 0x318F) || // 互換Jamo
+  			(code >= 0xAC00 && code <= 0xD7AF)    // 音節
+			) {
+ 				 return '가';
+			}
       return ch;
     }
 
@@ -94,5 +163,7 @@
     // initial
     handleInput();
   </script>
+
+
 </body>
 </html>
