@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
   <title>文字種変換</title>
   <style>
     body{display:flex;gap:16px;padding:24px;flex-wrap:wrap}
@@ -26,7 +27,7 @@
     <label>変換結果</label>
     <pre id="output" aria-live="polite"></pre>
   </div>
-
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
   <script>
     const input = document.getElementById('input');
     const output = document.getElementById('output');
@@ -156,14 +157,39 @@
     clearBtn.addEventListener('click', ()=>{ input.value=''; output.textContent=''; input.focus(); });
 
     copyBtn.addEventListener('click', async ()=>{
-      try{ await navigator.clipboard.writeText(output.textContent); alert('コピーしました'); }
-      catch{ alert('コピーに失敗しました'); }
+      try{ 
+        await navigator.clipboard.writeText(output.textContent);
+        Toastify({
+          text: "コピーしました",
+          duration: 1000,
+          close: true,
+          gravity: "bottom",
+          position: "center",
+          style: {
+            background: "#0a0a0a",
+            boxShadow: "0 0 10px #000"
+          },
+          oldestFirst: false
+        }).showToast();
+      }
+      catch{
+        Toastify({
+          text: "コピーに失敗しました",
+          duration: 1000,
+          close: true,
+          gravity: "bottom",
+          position: "center",
+          style: {
+            background: "#0a0a0a",
+            boxShadow: "0 0 10px #000"
+          },
+          oldestFirst: false
+        }).showToast();
+      }
     });
 
     // initial
     handleInput();
   </script>
-
-
 </body>
 </html>
