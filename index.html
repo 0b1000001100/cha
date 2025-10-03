@@ -16,15 +16,16 @@
 </head>
 <body>
   <div class="col">
-    <label>入力</label>
+    <label for="input">入力</label>
     <textarea id="input" placeholder="ここに文字を入力"></textarea>
     <div class="row">
       <button id="clearInput">入力クリア</button>
+      <button id="shareOutput">出力を共有</button>
       <button id="copyOutput">出力コピー</button>
     </div>
   </div>
   <div class="col">
-    <label>変換結果</label>
+    <label for="output">変換結果</label>
     <pre id="output" aria-live="polite"></pre>
   </div>
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
@@ -33,6 +34,7 @@
     const output = document.getElementById('output');
     const clearBtn = document.getElementById('clearInput');
     const copyBtn = document.getElementById('copyOutput');
+    const shareBtn = document.getElementById('shareOutput');
 
     let isComposing = false;
 
@@ -175,6 +177,26 @@
       catch{
         Toastify({
           text: "コピーに失敗しました",
+          duration: 1000,
+          close: true,
+          gravity: "bottom",
+          position: "center",
+          style: {
+            background: "#0a0a0a",
+            boxShadow: "0 0 10px #000"
+          },
+          oldestFirst: false
+        }).showToast();
+      }
+    });
+
+    shareBtn.addEventListener('click', async ()=>{
+      try{
+        await navigator.share({ text: output.textContent });
+      }
+      catch{
+        Toastify({
+          text: "共有に失敗しました",
           duration: 1000,
           close: true,
           gravity: "bottom",
